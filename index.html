@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Future Files</title>
+    <!-- Tailwind CSS (Styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gmailDark: '#202124',
+                        gmailRowHover: '#323438',
+                        gmailBlue: '#8ab4f8'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* The Rainbow Glow Animation */
+        @keyframes rainbow {
+            0% {
+                background-position: 0% 50%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        .rainbow-glow {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbow 6s ease infinite;
+            font-weight: 900;
+            text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+            font-size: 1.1em;
+        }
+
+        /* Search Bar Enlargement */
+        .search-container {
+            transition: all 0.3s ease;
+        }
+
+        .search-container:focus-within {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            background-color: #303134;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #202124;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #5f6368;
+            border-radius: 6px;
+            border: 3px solid #202124;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 dark:bg-gmailDark dark:text-gray-200 h-screen flex flex-col overflow-hidden">
+
+    <!-- HEADER (Search & Logo) -->
+    <header
+        class="h-16 flex items-center justify-between px-4 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gmailDark shrink-0 z-50">
+        <!-- Left: Logo -->
+        <div class="flex items-center w-60">
+            <button class="p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 mr-2">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <span class="text-xl font-bold tracking-tight text-red-500">Future<span
+                    class="text-gray-500 dark:text-white">Files</span></span>
+        </div>
+
+        <!-- Middle: Search -->
+        <div class="flex-1 max-w-2xl mx-4">
+            <div class="search-container bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center px-4 py-2">
+                <i class="fas fa-search text-gray-500 mr-3"></i>
+                <input type="text" id="searchInput" placeholder="Search transcripts..."
+                    class="bg-transparent border-none outline-none w-full text-lg dark:text-white"
+                    onkeyup="handleSearch(event)">
+                <i class="fas fa-sliders-h text-gray-500 ml-3 cursor-pointer hover:text-white"></i>
+            </div>
+        </div>
+
+        <!-- Right: Light/Dark Toggle -->
+        <div class="w-60 flex justify-end items-center">
+            <button onclick="toggleTheme()" class="p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <i id="themeIcon" class="fas fa-sun"></i>
+            </button>
+            <img src="https://ui-avatars.com/api/?name=TF&background=random" class="h-8 w-8 rounded-full ml-4">
+        </div>
+    </header>
+
+    <!-- MAIN BODY -->
+    <div class="flex flex-1 overflow-hidden">
+
+        <!-- SIDEBAR -->
+        <aside class="w-64 flex flex-col pt-4 pr-2 hidden md:flex hover:overflow-y-auto">
+            <button
+                class="ml-4 mb-6 bg-white text-gray-800 hover:shadow-lg transition px-6 py-4 rounded-2xl shadow-md flex items-center w-36">
+                <i class="fas fa-heart text-red-500 mr-3 text-xl"></i>
+                <span class="font-medium">Donate</span>
+            </button>
+
+            <div class="space-y-1">
+                <div
+                    class="bg-blue-100 dark:bg-gray-700 text-blue-800 dark:text-blue-300 font-bold px-6 py-2 rounded-r-full cursor-pointer flex items-center">
+                    <i class="fas fa-inbox w-6"></i> All Episodes
+                </div>
+                <div
+                    class="px-6 py-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-r-full cursor-pointer flex items-center text-gray-600 dark:text-gray-400">
+                    <i class="fas fa-star w-6"></i> Favorites
+                </div>
+            </div>
+        </aside>
+
+        <!-- EMAIL LIST AREA -->
+        <main class="flex-1 bg-white dark:bg-gmailDark rounded-tl-2xl overflow-y-auto" id="mainContainer">
+            <!-- Toolbar -->
+            <div
+                class="sticky top-0 bg-white dark:bg-gmailDark z-10 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex text-gray-500 dark:text-gray-400">
+                <input type="checkbox" class="mr-4">
+                <button onclick="renderEpisodes(window.db)" class="mr-4 hover:text-white"><i
+                        class="fas fa-redo"></i></button>
+                <span id="resultCount" class="text-sm pt-1">Loading...</span>
+            </div>
+
+            <!-- THE LIST -->
+            <div id="episodeList" class="pb-24">
+                <!-- Javascript will inject rows here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- AUDIO PLAYER FOOTER -->
+    <footer
+        class="h-20 bg-white dark:bg-gray-800 border-t border-gray-300 dark:border-gray-700 flex items-center px-4 justify-between z-50 shrink-0">
+        <div class="flex items-center w-1/4 truncate">
+            <div class="h-10 w-10 bg-red-500 rounded flex items-center justify-center text-white font-bold mr-3"
+                id="playerImg">TF</div>
+            <div>
+                <div id="playerTitle" class="font-bold text-sm truncate">Select an episode</div>
+                <div id="playerDate" class="text-xs text-gray-500">The Future Files</div>
+            </div>
+        </div>
+
+        <div class="flex-1 max-w-2xl flex flex-col items-center">
+            <audio id="audioElement" controls class="w-full h-10"></audio>
+        </div>
+
+        <div class="w-1/4 flex justify-end">
+            <a id="downloadBtn" href="#" target="_blank" class="text-gray-500 hover:text-white"><i
+                    class="fas fa-download"></i></a>
+        </div>
+    </footer>
+
+    <!-- LOAD DATABASE -->
+    <script src="data.js"></script>
+
+    <!-- LOGIC -->
+    <script>
+        // 1. Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                html.classList.add('dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        // 2. Render List
+        const list = document.getElementById('episodeList');
+        const countLabel = document.getElementById('resultCount');
+
+        function renderEpisodes(data, highlightKeyword = null) {
+            list.innerHTML = "";
+            countLabel.innerText = `${data.length} episodes`;
+
+            data.forEach(ep => {
+                const row = document.createElement('div');
+                row.className = "group flex items-center border-b border-gray-200 dark:border-gray-700 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gmailRowHover transition relative";
+
+                // If we are searching, show the snippet
+                let snippet = "";
+                let titleDisplay = ep.title;
+
+                if (highlightKeyword && ep.search_text.includes(highlightKeyword.toLowerCase())) {
+                    // Find the keyword in the text
+                    const regex = new RegExp(`(${highlightKeyword})`, 'gi');
+
+                    // RAINBOW HIGHLIGHT LOGIC
+                    // We grab a chunk of text around the keyword
+                    const index = ep.search_text.indexOf(highlightKeyword.toLowerCase());
+                    let start = Math.max(0, index - 50);
+                    let end = Math.min(ep.search_text.length, index + 100);
+                    let rawSnippet = "..." + ep.search_text.substring(start, end) + "...";
+
+                    // Apply rainbow class
+                    snippet = rawSnippet.replace(regex, '<span class="rainbow-glow">$1</span>');
+                }
+
+                row.innerHTML = `
+                    <div class="flex items-center w-12 text-gray-400">
+                        <input type="checkbox" class="mr-2">
+                        <i class="far fa-star hover:text-yellow-400"></i>
+                    </div>
+                    <div class="w-32 font-bold text-gray-700 dark:text-gray-300 text-sm whitespace-nowrap overflow-hidden">
+                        ${ep.date}
+                    </div>
+                    <div class="flex-1 text-gray-600 dark:text-gray-400 text-sm truncate pr-10">
+                        <span class="text-gray-900 dark:text-gray-200 font-bold text-base mr-2">${titleDisplay}</span>
+                        <span>${snippet}</span>
+                    </div>
+                    <div class="hidden group-hover:flex absolute right-4 top-2 bottom-2 items-center bg-white dark:bg-gmailRowHover pl-4 shadow-xl">
+                        <button onclick="playEpisode(${ep.id})" class="bg-gmailBlue text-white rounded-full p-2 w-10 h-10 hover:shadow-lg flex items-center justify-center">
+                            <i class="fas fa-play ml-1"></i>
+                        </button>
+                    </div>
+                `;
+
+                // Double click to play
+                row.addEventListener('dblclick', () => playEpisode(ep.id));
+                list.appendChild(row);
+            });
+        }
+
+        // 3. Play Function
+        function playEpisode(id, startTime = 0) {
+            const ep = window.db.find(e => e.id === id);
+            if (!ep) return;
+
+            const player = document.getElementById('audioElement');
+            const title = document.getElementById('playerTitle');
+            const date = document.getElementById('playerDate');
+            const dl = document.getElementById('downloadBtn');
+
+            // Set Metadata
+            title.innerText = ep.title;
+            date.innerText = ep.date;
+            dl.href = ep.audio;
+
+            // Set Audio Source
+            player.src = ep.audio;
+            player.currentTime = startTime;
+            player.play();
+
+            // Update URL so they can share it (e.g., ?ep=1&t=500)
+            const newUrl = `${window.location.pathname}?ep=${id}&t=${Math.floor(startTime)}`;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+        }
+
+        // 4. Search Function
+        function handleSearch(e) {
+            const term = e.target.value.toLowerCase();
+            if (term.length < 2) {
+                renderEpisodes(window.db);
+                return;
+            }
+
+            // Filter logic
+            const filtered = window.db.filter(ep =>
+                ep.title.toLowerCase().includes(term) ||
+                ep.search_text.includes(term)
+            );
+
+            renderEpisodes(filtered, term);
+        }
+
+        // 5. On Load (Handle shared links)
+        window.onload = function () {
+            // Check if db loaded
+            if (!window.db) {
+                document.getElementById('episodeList').innerHTML = '<div class="p-10 text-center">Error: data.js not found. Did you run the builder script?</div>';
+                return;
+            }
+
+            renderEpisodes(window.db);
+
+            // Check URL params
+            const params = new URLSearchParams(window.location.search);
+            const epId = params.get('ep');
+            const time = params.get('t');
+
+            if (epId) {
+                playEpisode(int(epId), time || 0);
+            }
+        };
+    </script>
+</body>
+
+</html>
