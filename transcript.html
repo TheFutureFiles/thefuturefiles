@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcript View</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gmailRed: '#ea4335',
+                        gmailGray: '#f2f2f2',
+                        gmailDark: '#202124',
+                        gmailRowHover: '#f5f5f5',
+                        darkRowHover: '#303134'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* CLEAN RAINBOW ANIMATION (No Glow, Slower) */
+        @keyframes colorCycle {
+            0% {
+                color: #ff0000;
+            }
+
+            15% {
+                color: #ff7f00;
+            }
+
+            30% {
+                color: #ffff00;
+            }
+
+            45% {
+                color: #00ff00;
+            }
+
+            60% {
+                color: #0000ff;
+            }
+
+            75% {
+                color: #4b0082;
+            }
+
+            90% {
+                color: #9400d3;
+            }
+
+            100% {
+                color: #ff0000;
+            }
+        }
+
+        .rainbow-glow {
+            animation: colorCycle 6s linear infinite;
+            /* Slower */
+            font-weight: 900;
+            /* No underline, no shadow */
+        }
+    </style>
+</head>
+
+<body
+    class="bg-white dark:bg-gmailDark text-gray-800 dark:text-gray-200 p-4 w-full relative transition-colors duration-200 overflow-x-hidden">
+
+    <div class="absolute top-2 right-2 z-50">
+        <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+            <i id="themeIcon" class="fas fa-sun text-yellow-400 text-lg"></i>
+        </button>
+    </div>
+
+    <div id="loading" class="text-center mt-20">Loading Transcript...</div>
+
+    <div id="content" class="hidden w-full">
+        <a href="javascript:window.close()" class="text-blue-500 hover:underline mb-4 block text-sm">&larr; Close
+            Tab</a>
+
+        <h1 id="epTitle" class="text-4xl md:text-5xl font-bold mb-2 leading-tight"></h1>
+        <div id="epDate" class="text-xl text-gray-500 mb-6"></div>
+
+        <!-- Animated Separator -->
+        <div class="relative h-px w-full mb-6 flex justify-center">
+            <div id="separatorLine"
+                class="h-full bg-gray-300 dark:bg-gray-700 w-0 transition-all duration-[1500ms] ease-out"></div>
+        </div>
+
+        <div id="transcriptBody" class="w-full text-lg leading-snug text-gray-700 dark:text-gray-300 pb-16">
+        </div>
+    </div>
+
+    <!-- Fixed Audio Player -->
+    <div
+        class="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-2 shadow-lg z-50">
+        <audio id="audioPlayer" controls class="w-full h-10"></audio>
+    </div>
+
+    <script src="data_part0.js"></script>
+    <script src="data_part1.js"></script>
+    <script src="data_part2.js"></script>
+    <script src="data_part3.js"></script>
+    <script src="data_part4.js"></script>
+    <script src="data_part5.js"></script>
+    <script src="data_part6.js"></script>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = "fas fa-moon text-gray-600 text-lg";
+            } else {
+                html.classList.add('dark');
+                icon.className = "fas fa-sun text-yellow-400 text-lg";
+            }
+        }
+
+        function formatDateWithSlashes(dateStr) {
+            if (!dateStr || dateStr.length < 8) return dateStr;
+            return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`;
+        }
+
+        function playAt(seconds) {
+            const player = document.getElementById('audioPlayer');
+            player.currentTime = seconds;
+            player.play();
+        }
+
+        window.onload = function () {
+            // Trigger Animation
+            setTimeout(() => {
+                document.getElementById('separatorLine').classList.remove('w-0');
+                document.getElementById('separatorLine').classList.add('w-full');
+            }, 100);
+
+            if (!window.db) return;
+
+            const params = new URLSearchParams(window.location.search);
+            const id = parseInt(params.get('id'));
+            const searchRaw = params.get('search');
+
+            const ep = window.db.find(e => e.id === id);
+
+            if (!ep) {
+                document.getElementById('loading').innerText = "Episode not found.";
+                return;
+            }
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+            document.getElementById('epTitle').innerText = ep.title;
+            document.getElementById('epDate').innerText = formatDateWithSlashes(ep.date);
+
+            const player = document.getElementById('audioPlayer');
+            if (ep.audio) {
+                player.src = ep.audio;
+            } else {
+                player.style.display = 'none';
+            }
+
+            // Prepare Search Terms
+            let searchTerms = [];
+            if (searchRaw) {
+                searchTerms = searchRaw.split(' ').map(t => t.toLowerCase().trim()).filter(t => t);
+            }
+
+            const container = document.getElementById('transcriptBody');
+
+            if (ep.segments && ep.segments.length > 0) {
+                ep.segments.forEach(seg => {
+                    let text = seg.t;
+
+                    // Highlight
+                    if (searchTerms.length > 0) {
+                        searchTerms.forEach(term => {
+                            // Escape regex chars
+                            const cleanTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            const regex = new RegExp(`(${cleanTerm})`, 'gi');
+                            text = text.replace(regex, '<span class="rainbow-glow">$1</span>');
+                        });
+                    }
+
+                    // Format Time
+                    const seconds = seg.s;
+                    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+                    const timeStr = `[${h}:${m}:${s}]`;
+
+                    const div = document.createElement('div');
+                    div.className = "flex gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 px-1 py-0.5 rounded cursor-pointer group"; // Extremely tight spacing
+                    div.onclick = () => playAt(seconds);
+                    div.innerHTML = `
+                        <span class="text-blue-500 dark:text-blue-400 font-mono text-xs whitespace-nowrap pt-1 select-none opacity-70 group-hover:opacity-100 transition-opacity">${timeStr}</span>
+                        <span class="text-base">${text}</span>
+                    `;
+                    container.appendChild(div);
+                });
+            } else {
+                container.innerText = ep.search_text || "No transcript text available.";
+            }
+        };
+    </script>
+</body>
+
+</html>
