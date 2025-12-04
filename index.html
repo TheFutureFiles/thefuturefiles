@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Future Files</title>
-    <!-- Tailwind CSS (Styling) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,17 +12,17 @@
             theme: {
                 extend: {
                     colors: {
+                        gmailRed: '#ea4335',
+                        gmailGray: '#f2f2f2',
                         gmailDark: '#202124',
-                        gmailRowHover: '#323438',
-                        gmailBlue: '#8ab4f8'
+                        gmailRowHover: '#f5f5f5',
+                        darkRowHover: '#303134'
                     }
                 }
             }
         }
     </script>
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -31,7 +30,7 @@
             font-family: 'Roboto', sans-serif;
         }
 
-        /* The Rainbow Glow Animation */
+        /* Rainbow Glow */
         @keyframes rainbow {
             0% {
                 background-position: 0% 50%
@@ -54,270 +53,545 @@
             color: transparent;
             animation: rainbow 6s ease infinite;
             font-weight: 900;
-            text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
             font-size: 1.1em;
+            text-decoration: underline;
         }
 
-        /* Search Bar Enlargement */
-        .search-container {
-            transition: all 0.3s ease;
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #ea4335;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
         }
 
-        .search-container:focus-within {
-            transform: scale(1.02);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            background-color: #303134;
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 12px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #202124;
+            background: transparent;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #5f6368;
+            background: #c1c1c1;
             border-radius: 6px;
-            border: 3px solid #202124;
+            border: 3px solid #fff;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #5f6368;
+            border-color: #202124;
+        }
+
+        /* Checkmark Style */
+        .check-icon {
+            visibility: hidden;
+        }
+
+        .active-filter .check-icon {
+            visibility: visible;
         }
     </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800 dark:bg-gmailDark dark:text-gray-200 h-screen flex flex-col overflow-hidden">
+<body
+    class="bg-white dark:bg-gmailDark text-gray-800 dark:text-gray-200 h-screen flex flex-col overflow-hidden transition-colors duration-200">
 
-    <!-- HEADER (Search & Logo) -->
     <header
-        class="h-16 flex items-center justify-between px-4 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gmailDark shrink-0 z-50">
-        <!-- Left: Logo -->
-        <div class="flex items-center w-60">
-            <button class="p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 mr-2">
-                <i class="fas fa-bars text-xl"></i>
+        class="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gmailDark shrink-0 z-50">
+        <div class="flex items-center flex-1">
+            <button class="p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 mr-4">
+                <i class="fas fa-bars text-xl text-gray-600 dark:text-gray-400"></i>
             </button>
-            <span class="text-xl font-bold tracking-tight text-red-500">Future<span
+            <span class="text-xl font-bold tracking-tight text-red-500 mr-8 w-32">Future<span
                     class="text-gray-500 dark:text-white">Files</span></span>
-        </div>
 
-        <!-- Middle: Search -->
-        <div class="flex-1 max-w-2xl mx-4">
-            <div class="search-container bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center px-4 py-2">
-                <i class="fas fa-search text-gray-500 mr-3"></i>
-                <input type="text" id="searchInput" placeholder="Search transcripts..."
-                    class="bg-transparent border-none outline-none w-full text-lg dark:text-white"
-                    onkeyup="handleSearch(event)">
-                <i class="fas fa-sliders-h text-gray-500 ml-3 cursor-pointer hover:text-white"></i>
+            <div
+                class="bg-gray-100 dark:bg-gray-700 rounded-3xl flex items-center px-4 py-2 max-w-2xl w-full mx-2 focus-within:bg-white dark:focus-within:bg-gray-600 focus-within:shadow-md transition-all shadow-sm">
+                <i class="fas fa-search text-gray-500 dark:text-gray-400 mr-3"></i>
+                <input type="text" id="searchInput" placeholder='Search transcripts...'
+                    class="bg-transparent border-none outline-none w-full text-base dark:text-white dark:placeholder-gray-400"
+                    oninput="handleInputSearch()">
             </div>
         </div>
 
-        <!-- Right: Light/Dark Toggle -->
-        <div class="w-60 flex justify-end items-center">
-            <button onclick="toggleTheme()" class="p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                <i id="themeIcon" class="fas fa-sun"></i>
+        <div class="flex justify-end items-center w-32 space-x-2">
+            <button onclick="toggleTheme()"
+                class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                <i id="themeIcon" class="fas fa-moon text-gray-600 dark:text-yellow-400 text-lg"></i>
             </button>
-            <img src="https://ui-avatars.com/api/?name=TF&background=random" class="h-8 w-8 rounded-full ml-4">
+            <img src="https://ui-avatars.com/api/?name=TF&background=random" class="h-8 w-8 rounded-full">
         </div>
     </header>
 
-    <!-- MAIN BODY -->
     <div class="flex flex-1 overflow-hidden">
 
-        <!-- SIDEBAR -->
-        <aside class="w-64 flex flex-col pt-4 pr-2 hidden md:flex hover:overflow-y-auto">
+        <aside
+            class="w-64 flex flex-col pt-4 pr-2 hidden md:flex hover:overflow-y-auto shrink-0 bg-white dark:bg-gmailDark">
             <button
-                class="ml-4 mb-6 bg-white text-gray-800 hover:shadow-lg transition px-6 py-4 rounded-2xl shadow-md flex items-center w-36">
-                <i class="fas fa-heart text-red-500 mr-3 text-xl"></i>
-                <span class="font-medium">Donate</span>
+                class="ml-4 mb-6 bg-white dark:bg-gray-800 text-gray-800 dark:text-white border dark:border-gray-600 hover:shadow-lg transition px-6 py-4 rounded-2xl shadow-sm flex items-center w-40">
+                <i class="fas fa-heart text-red-500 mr-3 text-xl"></i><span class="font-medium">Donate</span>
             </button>
-
             <div class="space-y-1">
-                <div
-                    class="bg-blue-100 dark:bg-gray-700 text-blue-800 dark:text-blue-300 font-bold px-6 py-2 rounded-r-full cursor-pointer flex items-center">
-                    <i class="fas fa-inbox w-6"></i> All Episodes
+                <div onclick="setFilter('any')"
+                    class="bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 font-bold px-6 py-2 rounded-r-full cursor-pointer flex items-center border-l-4 border-red-500">
+                    <i class="fas fa-inbox w-5 mr-4"></i> All Episodes
                 </div>
-                <div
-                    class="px-6 py-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-r-full cursor-pointer flex items-center text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-star w-6"></i> Favorites
+                <div onclick="toggleCompose()"
+                    class="px-6 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-r-full cursor-pointer flex items-center text-gray-700 dark:text-gray-400 mt-2">
+                    <i class="fas fa-paper-plane w-5 mr-4 text-blue-500"></i> Mail Me!
                 </div>
             </div>
         </aside>
 
-        <!-- EMAIL LIST AREA -->
-        <main class="flex-1 bg-white dark:bg-gmailDark rounded-tl-2xl overflow-y-auto" id="mainContainer">
-            <!-- Toolbar -->
+        <main class="flex-1 bg-white dark:bg-gmailDark overflow-y-auto relative" id="mainContainer">
             <div
-                class="sticky top-0 bg-white dark:bg-gmailDark z-10 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex text-gray-500 dark:text-gray-400">
-                <input type="checkbox" class="mr-4">
-                <button onclick="renderEpisodes(window.db)" class="mr-4 hover:text-white"><i
-                        class="fas fa-redo"></i></button>
-                <span id="resultCount" class="text-sm pt-1">Loading...</span>
+                class="flex border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gmailDark z-10 pt-2 justify-start">
+                <div
+                    class="w-40 flex items-center justify-center p-4 border-b-4 border-red-500 text-red-600 bg-gray-50 dark:bg-gray-800 cursor-pointer transition">
+                    <i class="fas fa-microphone-alt mr-3"></i><span class="font-bold">Episodes</span>
+                </div>
+                <div
+                    class="w-40 flex items-center justify-center p-4 border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition">
+                    <i class="fas fa-video mr-3 text-blue-500"></i><span class="font-medium">Video</span>
+                </div>
+                <div
+                    class="w-40 flex items-center justify-center p-4 border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition">
+                    <i class="fas fa-tag mr-3 text-green-500"></i><span class="font-medium">Marketplace</span>
+                </div>
+                <div
+                    class="w-48 flex items-center justify-center p-4 border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition">
+                    <i class="fas fa-gamepad mr-3 text-purple-500"></i><span class="font-medium">The Video Game</span>
+                </div>
             </div>
 
-            <!-- THE LIST -->
-            <div id="episodeList" class="pb-24">
-                <!-- Javascript will inject rows here -->
+            <div
+                class="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gmailDark sticky top-[66px] z-10">
+
+                <div class="relative">
+                    <button onclick="toggleDateMenu()"
+                        class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-1 rounded border border-transparent hover:border-gray-200 dark:hover:border-gray-600 flex items-center">
+                        <span id="dateLabel">Any time</span> <i class="fas fa-caret-down ml-2"></i>
+                    </button>
+
+                    <div id="dateMenu"
+                        class="hidden absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 shadow-xl rounded-lg border border-gray-200 dark:border-gray-600 py-2 z-20">
+                        <div class="text-xs font-bold text-gray-400 px-4 py-1 uppercase tracking-wider">Date Modified
+                        </div>
+
+                        <div onclick="setFilter('any')" id="opt-any"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200 active-filter">
+                            <span>Any time</span> <i class="fas fa-check text-blue-600 check-icon"></i>
+                        </div>
+                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+
+                        <div onclick="setFilter('2022')" id="opt-2022"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
+                            <span>2022</span> <i class="fas fa-check text-blue-600 check-icon"></i></div>
+                        <div onclick="setFilter('2021')" id="opt-2021"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
+                            <span>2021</span> <i class="fas fa-check text-blue-600 check-icon"></i></div>
+                        <div onclick="setFilter('2020')" id="opt-2020"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
+                            <span>2020</span> <i class="fas fa-check text-blue-600 check-icon"></i></div>
+                        <div onclick="setFilter('2019')" id="opt-2019"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
+                            <span>2019</span> <i class="fas fa-check text-blue-600 check-icon"></i></div>
+                        <div onclick="setFilter('2018')" id="opt-2018"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
+                            <span>2018</span> <i class="fas fa-check text-blue-600 check-icon"></i></div>
+                        <div onclick="setFilter('2017')" id="opt-2017"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
+                            <span>2017</span> <i class="fas fa-check text-blue-600 check-icon"></i></div>
+                        <div onclick="setFilter('2016')" id="opt-2016"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
+                            <span>2016</span> <i class="fas fa-check text-blue-600 check-icon"></i></div>
+
+                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                        <div onclick="openCustomRange()" id="opt-custom"
+                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
+                            <span>Custom Range...</span> <i class="fas fa-check text-blue-600 check-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <span id="resultCount" class="text-xs text-gray-400">Loading...</span>
             </div>
+
+            <div id="episodeList" class="pb-24"></div>
         </main>
     </div>
 
-    <!-- AUDIO PLAYER FOOTER -->
     <footer
-        class="h-20 bg-white dark:bg-gray-800 border-t border-gray-300 dark:border-gray-700 flex items-center px-4 justify-between z-50 shrink-0">
+        class="h-20 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center px-4 justify-between z-50 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         <div class="flex items-center w-1/4 truncate">
             <div class="h-10 w-10 bg-red-500 rounded flex items-center justify-center text-white font-bold mr-3"
                 id="playerImg">TF</div>
             <div>
-                <div id="playerTitle" class="font-bold text-sm truncate">Select an episode</div>
-                <div id="playerDate" class="text-xs text-gray-500">The Future Files</div>
+                <div id="playerTitle" class="font-bold text-sm truncate dark:text-white">Select an episode</div>
+                <div id="playerDate" class="text-xs text-gray-500 dark:text-gray-400">The Future Files</div>
             </div>
         </div>
-
         <div class="flex-1 max-w-2xl flex flex-col items-center">
-            <audio id="audioElement" controls class="w-full h-10"></audio>
+            <audio id="audioElement" controls class="w-full h-10 rounded-md"></audio>
         </div>
-
         <div class="w-1/4 flex justify-end">
-            <a id="downloadBtn" href="#" target="_blank" class="text-gray-500 hover:text-white"><i
-                    class="fas fa-download"></i></a>
+            <a id="downloadBtn" href="#" target="_blank"
+                class="text-gray-400 hover:text-gray-800 dark:hover:text-white"><i class="fas fa-download"></i></a>
         </div>
     </footer>
 
-    <!-- LOAD DATABASE -->
-    <script src="data.js"></script>
+    <div id="composeModal"
+        class="fixed bottom-0 right-20 w-[500px] bg-white dark:bg-gray-800 rounded-t-lg shadow-2xl z-[60] hidden border border-gray-300 dark:border-gray-600 transform translate-y-full transition-transform duration-300 compose-box">
+        <div class="bg-gray-900 text-white px-4 py-2 rounded-t-lg flex justify-between items-center cursor-pointer"
+            onclick="toggleCompose()">
+            <span class="font-bold text-sm">New Message</span>
+            <div class="flex space-x-3"><i class="fas fa-times hover:text-gray-300"></i></div>
+        </div>
+        <div class="p-6 h-96 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <i class="fas fa-paper-plane text-6xl text-blue-500 mb-6"></i>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Send me mail!</h2>
+            <div
+                class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-6 rounded text-center shadow-sm w-full">
+                <p class="text-gray-600 dark:text-gray-300 font-bold">P.O. Box 29012</p>
+                <p class="text-gray-600 dark:text-gray-300">Los Angeles, CA 90029</p>
+            </div>
+        </div>
+    </div>
 
-    <!-- LOGIC -->
+    <div id="customRangeModal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-80">
+            <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-white">Custom Date Range</h3>
+            <label class="block text-xs text-gray-500 mb-1">Start Date</label>
+            <input type="date" id="startDate"
+                class="w-full mb-3 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+
+            <label class="block text-xs text-gray-500 mb-1">End Date</label>
+            <input type="date" id="endDate"
+                class="w-full mb-6 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeCustomRange()"
+                    class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                <button onclick="applyCustomRange()"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data_part0.js"></script>
+    <script src="data_part1.js"></script>
+    <script src="data_part2.js"></script>
+    <script src="data_part3.js"></script>
+    <script src="data_part4.js"></script>
+    <script src="data_part5.js"></script>
+    <script src="data_part6.js"></script>
     <script>
-        // 1. Theme Toggle
+        let currentPlayingId = null;
+        let activeFilter = 'any'; // 'any', '2016', 'custom'
+        let customStart = null;
+        let customEnd = null;
+        const player = document.getElementById('audioElement');
+
+        // Helper: Convert YYYYMMDD to YYYY/MM/DD
+        function formatDateWithSlashes(dateStr) {
+            if (!dateStr || dateStr.length < 8) return dateStr;
+            return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`;
+        }
+        function formatTimestamp(seconds) {
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `[${h}:${m}:${s}]`;
+        }
+
         function toggleTheme() {
             const html = document.documentElement;
             const icon = document.getElementById('themeIcon');
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
+                icon.className = "fas fa-moon text-gray-600 text-lg";
             } else {
                 html.classList.add('dark');
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
+                icon.className = "fas fa-sun text-yellow-400 text-lg";
             }
         }
 
-        // 2. Render List
+        // --- DROPDOWN & FILTER LOGIC ---
+        function toggleDateMenu() {
+            const menu = document.getElementById('dateMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const menu = document.getElementById('dateMenu');
+            const button = document.querySelector('button[onclick="toggleDateMenu()"]');
+            if (!button.contains(event.target) && !menu.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        function setFilter(val) {
+            activeFilter = val;
+            customStart = null;
+            customEnd = null;
+
+            // Update UI
+            updateFilterUI(val === 'any' ? 'Any time' : val);
+            document.getElementById('dateMenu').classList.add('hidden');
+
+            runFilters();
+        }
+
+        function updateFilterUI(label) {
+            document.getElementById('dateLabel').innerText = label;
+
+            // Handle Checkmarks
+            document.querySelectorAll('#dateMenu .active-filter').forEach(el => el.classList.remove('active-filter'));
+
+            if (activeFilter === 'custom') {
+                document.getElementById('opt-custom').classList.add('active-filter');
+            } else {
+                const el = document.getElementById(`opt-${activeFilter}`);
+                if (el) el.classList.add('active-filter');
+            }
+        }
+
+        function openCustomRange() {
+            document.getElementById('dateMenu').classList.add('hidden');
+            document.getElementById('customRangeModal').classList.remove('hidden');
+        }
+
+        function closeCustomRange() {
+            document.getElementById('customRangeModal').classList.add('hidden');
+        }
+
+        function applyCustomRange() {
+            const s = document.getElementById('startDate').value;
+            const e = document.getElementById('endDate').value;
+
+            if (s && e) {
+                activeFilter = 'custom';
+                customStart = s.replace(/-/g, ''); // Convert 2022-01-01 to 20220101
+                customEnd = e.replace(/-/g, '');
+
+                updateFilterUI("Custom Range");
+                closeCustomRange();
+                runFilters();
+            } else {
+                alert("Please select both dates.");
+            }
+        }
+
+        function runFilters() {
+            if (!window.db) return;
+            const query = document.getElementById('searchInput').value;
+            let data = window.db;
+
+            // 1. Date Filter
+            if (activeFilter !== 'any') {
+                if (activeFilter === 'custom') {
+                    data = data.filter(ep => {
+                        return ep.date >= customStart && ep.date <= customEnd;
+                    });
+                } else {
+                    // Year filter
+                    data = data.filter(ep => ep.date.startsWith(activeFilter));
+                }
+            }
+
+            // 2. Search Filter
+            if (query && query.trim().length > 0) {
+                const rawTerms = query.split('+');
+                const terms = rawTerms.map(t => t.trim().replace(/~/g, ' ').toLowerCase()).filter(t => t.length >= 1);
+
+                if (terms.length > 0) {
+                    data = data.filter(ep => {
+                        const titleLower = (ep.title || "").toLowerCase();
+                        const textLower = (ep.search_text || "").toLowerCase();
+                        return terms.every(term => titleLower.includes(term) || textLower.includes(term));
+                    });
+                    renderEpisodes(data, terms);
+                    return;
+                }
+            }
+
+            renderEpisodes(data);
+        }
+
+        // --- RENDER ---
         const list = document.getElementById('episodeList');
         const countLabel = document.getElementById('resultCount');
 
-        function renderEpisodes(data, highlightKeyword = null) {
+        function renderEpisodes(data, searchTerms = []) {
             list.innerHTML = "";
             countLabel.innerText = `${data.length} episodes`;
 
             data.forEach(ep => {
                 const row = document.createElement('div');
-                row.className = "group flex items-center border-b border-gray-200 dark:border-gray-700 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gmailRowHover transition relative";
+                row.className = "group flex items-center border-b border-gray-100 dark:border-gray-700 px-4 py-3 cursor-pointer hover:shadow-md hover:bg-gray-50 dark:hover:bg-darkRowHover transition relative";
 
-                // If we are searching, show the snippet
+                const displayDate = formatDateWithSlashes(ep.date || "");
+
+                // Snippet
                 let snippet = "";
-                let titleDisplay = ep.title;
+                let timestampHTML = "";
+                let startTime = 0;
 
-                if (highlightKeyword && ep.search_text.includes(highlightKeyword.toLowerCase())) {
-                    // Find the keyword in the text
-                    const regex = new RegExp(`(${highlightKeyword})`, 'gi');
+                if (searchTerms.length > 0 && ep.segments) {
+                    const primaryTerm = searchTerms[0];
+                    const matchedSegment = ep.segments.find(seg =>
+                        seg.t.toLowerCase().includes(primaryTerm)
+                    );
 
-                    // RAINBOW HIGHLIGHT LOGIC
-                    // We grab a chunk of text around the keyword
-                    const index = ep.search_text.indexOf(highlightKeyword.toLowerCase());
-                    let start = Math.max(0, index - 50);
-                    let end = Math.min(ep.search_text.length, index + 100);
-                    let rawSnippet = "..." + ep.search_text.substring(start, end) + "...";
+                    if (matchedSegment) {
+                        startTime = matchedSegment.s;
+                        let text = matchedSegment.t;
 
-                    // Apply rainbow class
-                    snippet = rawSnippet.replace(regex, '<span class="rainbow-glow">$1</span>');
+                        const fullText = ep.search_text;
+                        const matchIndex = fullText.indexOf(primaryTerm);
+                        if (matchIndex !== -1) {
+                            const startIdx = Math.max(0, matchIndex - 150);
+                            const endIdx = Math.min(fullText.length, matchIndex + 350);
+                            text = "..." + fullText.substring(startIdx, endIdx) + "...";
+                        }
+
+                        searchTerms.forEach(term => {
+                            const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                            text = text.replace(regex, '<span class="rainbow-glow">$1</span>');
+                        });
+
+                        timestampHTML = `<span class="text-blue-600 dark:text-blue-400 font-mono text-xs mr-2">${formatTimestamp(startTime)}</span>`;
+                        snippet = text;
+                    } else {
+                        snippet = ep.search_text.substring(0, 150) + "...";
+                    }
+                } else {
+                    if (ep.search_text && ep.search_text.length > 0) {
+                        snippet = ep.search_text.substring(0, 150) + "...";
+                    } else {
+                        snippet = "No transcript available.";
+                    }
+                }
+
+                let iconClass = "fas fa-play";
+                if (currentPlayingId === ep.id) {
+                    iconClass = player.paused ? "fas fa-play" : "fas fa-pause";
                 }
 
                 row.innerHTML = `
-                    <div class="flex items-center w-12 text-gray-400">
-                        <input type="checkbox" class="mr-2">
-                        <i class="far fa-star hover:text-yellow-400"></i>
-                    </div>
-                    <div class="w-32 font-bold text-gray-700 dark:text-gray-300 text-sm whitespace-nowrap overflow-hidden">
-                        ${ep.date}
-                    </div>
-                    <div class="flex-1 text-gray-600 dark:text-gray-400 text-sm truncate pr-10">
-                        <span class="text-gray-900 dark:text-gray-200 font-bold text-base mr-2">${titleDisplay}</span>
-                        <span>${snippet}</span>
-                    </div>
-                    <div class="hidden group-hover:flex absolute right-4 top-2 bottom-2 items-center bg-white dark:bg-gmailRowHover pl-4 shadow-xl">
-                        <button onclick="playEpisode(${ep.id})" class="bg-gmailBlue text-white rounded-full p-2 w-10 h-10 hover:shadow-lg flex items-center justify-center">
-                            <i class="fas fa-play ml-1"></i>
+                    <div class="w-12 flex justify-center items-center flex-shrink-0">
+                        <button id="btn-${ep.id}" onclick="playEpisode(${ep.id}, ${startTime})" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition focus:outline-none">
+                            <i class="${iconClass} text-sm"></i>
                         </button>
+                    </div>
+                    
+                    <div class="flex-1 min-w-0 pr-4">
+                        <div class="flex items-baseline">
+                            <span class="text-gray-900 dark:text-white font-bold text-base mr-2">${ep.title}</span>
+                        </div>
+                        <div class="mt-1 leading-relaxed text-gray-500 dark:text-gray-400 text-sm truncate">${timestampHTML} ${snippet}</div>
+                    </div>
+
+                    <div class="w-24 text-right font-bold text-gray-600 dark:text-gray-400 text-sm whitespace-nowrap flex-shrink-0">
+                        ${displayDate}
                     </div>
                 `;
 
-                // Double click to play
-                row.addEventListener('dblclick', () => playEpisode(ep.id));
+                row.addEventListener('dblclick', () => playEpisode(ep.id, startTime));
                 list.appendChild(row);
             });
         }
 
-        // 3. Play Function
+        // --- INSTANT SEARCH ---
+        function handleInputSearch() {
+            runFilters();
+        }
+
+        // --- PLAY LOGIC ---
         function playEpisode(id, startTime = 0) {
             const ep = window.db.find(e => e.id === id);
-            if (!ep) return;
+            if (!ep || !ep.audio) {
+                alert("Audio link not found.");
+                return;
+            }
 
-            const player = document.getElementById('audioElement');
-            const title = document.getElementById('playerTitle');
-            const date = document.getElementById('playerDate');
-            const dl = document.getElementById('downloadBtn');
+            if (currentPlayingId === id) {
+                if (player.paused) player.play();
+                else player.pause();
+                return;
+            }
 
-            // Set Metadata
-            title.innerText = ep.title;
-            date.innerText = ep.date;
-            dl.href = ep.audio;
+            const oldId = currentPlayingId;
+            currentPlayingId = id;
 
-            // Set Audio Source
+            if (oldId && oldId !== id) {
+                const oldBtn = document.getElementById(`btn-${oldId}`);
+                if (oldBtn) oldBtn.innerHTML = '<i class="fas fa-play text-sm"></i>';
+            }
+
+            document.getElementById('playerTitle').innerText = ep.title;
+            const displayDate = formatDateWithSlashes(ep.date || "");
+            document.getElementById('playerDate').innerText = displayDate;
+            document.getElementById('downloadBtn').href = ep.audio;
+
+            const btn = document.getElementById(`btn-${id}`);
+            if (btn) btn.innerHTML = '<div class="loader"></div>';
+
             player.src = ep.audio;
             player.currentTime = startTime;
             player.play();
-
-            // Update URL so they can share it (e.g., ?ep=1&t=500)
-            const newUrl = `${window.location.pathname}?ep=${id}&t=${Math.floor(startTime)}`;
-            window.history.pushState({ path: newUrl }, '', newUrl);
         }
 
-        // 4. Search Function
-        function handleSearch(e) {
-            const term = e.target.value.toLowerCase();
-            if (term.length < 2) {
-                renderEpisodes(window.db);
-                return;
+        player.addEventListener('playing', () => {
+            if (currentPlayingId) {
+                const btn = document.getElementById(`btn-${currentPlayingId}`);
+                if (btn) btn.innerHTML = '<i class="fas fa-pause text-sm text-red-500"></i>';
             }
+        });
 
-            // Filter logic
-            const filtered = window.db.filter(ep =>
-                ep.title.toLowerCase().includes(term) ||
-                ep.search_text.includes(term)
-            );
+        player.addEventListener('waiting', () => {
+            if (currentPlayingId) {
+                const btn = document.getElementById(`btn-${currentPlayingId}`);
+                if (btn) btn.innerHTML = '<div class="loader"></div>';
+            }
+        });
 
-            renderEpisodes(filtered, term);
+        player.addEventListener('pause', () => {
+            if (currentPlayingId) {
+                const btn = document.getElementById(`btn-${currentPlayingId}`);
+                if (btn) btn.innerHTML = '<i class="fas fa-play text-sm"></i>';
+            }
+        });
+
+        function toggleCompose() {
+            const modal = document.getElementById('composeModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('translate-y-full'), 10);
+            } else {
+                modal.classList.add('translate-y-full');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
         }
 
-        // 5. On Load (Handle shared links)
         window.onload = function () {
-            // Check if db loaded
-            if (!window.db) {
-                document.getElementById('episodeList').innerHTML = '<div class="p-10 text-center">Error: data.js not found. Did you run the builder script?</div>';
-                return;
-            }
-
-            renderEpisodes(window.db);
-
-            // Check URL params
-            const params = new URLSearchParams(window.location.search);
-            const epId = params.get('ep');
-            const time = params.get('t');
-
-            if (epId) {
-                playEpisode(int(epId), time || 0);
+            if (window.db) {
+                renderEpisodes(window.db);
             }
         };
     </script>
