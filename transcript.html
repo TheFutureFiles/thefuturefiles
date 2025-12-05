@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transcript View</title>
+    <link rel="icon" href="thefuturefiles.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,7 +15,7 @@
                     colors: {
                         gmailRed: '#ea4335',
                         gmailGray: '#f2f2f2',
-                        gmailDark: '#202124',
+                        gmailDark: '#131314',
                         gmailRowHover: '#f5f5f5',
                         darkRowHover: '#303134'
                     }
@@ -74,7 +75,7 @@
 </head>
 
 <body
-    class="bg-white dark:bg-gmailDark text-gray-800 dark:text-gray-200 p-4 w-full relative transition-colors duration-200 overflow-x-hidden">
+    class="bg-white dark:bg-gmailDark text-gray-800 dark:text-gray-200 w-full relative transition-colors duration-200 overflow-x-hidden">
 
     <div class="absolute top-2 right-2 z-50">
         <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
@@ -84,7 +85,7 @@
 
     <div id="loading" class="text-center mt-20">Loading Transcript...</div>
 
-    <div id="content" class="hidden w-full">
+    <div id="content" class="hidden w-full px-4 pt-4">
         <a href="javascript:window.close()" class="text-blue-500 hover:underline mb-4 block text-sm">&larr; Close
             Tab</a>
 
@@ -201,11 +202,11 @@
                     const timeStr = `[${h}:${m}:${s}]`;
 
                     const div = document.createElement('div');
-                    div.className = "flex gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 px-1 py-0.5 rounded cursor-pointer group"; // Extremely tight spacing
+                    div.className = "flex gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 px-1 py-0 rounded cursor-pointer group"; // Tight spacing
                     div.onclick = () => playAt(seconds);
                     div.innerHTML = `
-                        <span class="text-blue-500 dark:text-blue-400 font-mono text-xs whitespace-nowrap pt-1 select-none opacity-70 group-hover:opacity-100 transition-opacity">${timeStr}</span>
-                        <span class="text-base">${text}</span>
+                        <span class="text-blue-400 font-mono font-bold text-sm whitespace-nowrap select-none opacity-100 transition-opacity">${timeStr}</span>
+                        <span class="text-base leading-tight">${text}</span>
                     `;
                     container.appendChild(div);
                 });
