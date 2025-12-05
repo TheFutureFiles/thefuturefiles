@@ -142,12 +142,37 @@
             border-color: #202124;
         }
 
-        .check-icon {
-            visibility: hidden;
+        /* Filter Chips */
+        .filter-chip {
+            background-color: #282828;
+            /* Dark Gray */
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            /* Fully rounded */
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid transparent;
         }
 
-        .active-filter .check-icon {
-            visibility: visible;
+        .filter-chip:hover {
+            background-color: #3E3E3E;
+        }
+
+        .active-chip {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border-color: #ffffff;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         /* Play Button Hover Logic */
@@ -243,9 +268,6 @@
             border-radius: 2px;
         }
 
-        /* Progress fill handled via JS background-size or separate element, 
-           but for simplicity using accent-color or simple track */
-
         .overlay-lyrics {
             background: linear-gradient(180deg, #2a3e2a 0%, #121212 100%);
         }
@@ -282,7 +304,6 @@
                 class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
                 <i id="themeIcon" class="fas fa-sun text-yellow-400 text-lg"></i>
             </button>
-
         </div>
     </header>
 
@@ -295,12 +316,16 @@
                     Files</span>
             </button>
             <div class="space-y-1">
-                <div onclick="setFilter('any')"
-                    class="bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 font-bold px-6 py-2 rounded-r-full cursor-pointer flex items-center border-l-4 border-orange-500">
+                <div onclick="setView('episodes')" id="nav-episodes"
+                    class="bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 font-bold px-6 py-2 rounded-r-full cursor-pointer flex items-center border-l-4 border-orange-500 transition-colors">
                     <i class="fas fa-inbox w-5 mr-4"></i> All Episodes
                 </div>
+                <div onclick="setView('marketplace')" id="nav-marketplace"
+                    class="px-6 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-r-full cursor-pointer flex items-center text-gray-700 dark:text-gray-400 mt-2 border-l-4 border-transparent transition-colors">
+                    <i class="fas fa-store w-5 mr-4 text-green-500"></i> Marketplace
+                </div>
                 <div onclick="toggleCompose()"
-                    class="px-6 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-r-full cursor-pointer flex items-center text-gray-700 dark:text-gray-400 mt-2">
+                    class="px-6 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-r-full cursor-pointer flex items-center text-gray-700 dark:text-gray-400 mt-2 border-l-4 border-transparent transition-colors">
                     <i class="fas fa-paper-plane w-5 mr-4 text-blue-500"></i> Mail Me!
                 </div>
             </div>
@@ -313,76 +338,46 @@
             <div id="micOverlay" class="hidden absolute inset-0 z-40 overlay-lyrics p-8 overflow-y-auto">
                 <div class="max-w-4xl mx-auto mt-10">
                     <h2 id="overlayTitle" class="text-4xl font-bold text-white mb-8"></h2>
-                    <div id="overlayText" class="text-2xl font-bold text-white/80 leading-relaxed space-y-6">
-                        <!-- Lyrics/Transcript goes here -->
-                    </div>
+                    <div id="overlayText" class="text-2xl font-bold text-white/80 leading-relaxed space-y-6"></div>
                 </div>
             </div>
 
-            <div
-                class="flex border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gmailDark z-10 pt-2 justify-start">
-                <div
-                    class="w-40 flex items-center justify-center p-4 border-b-4 border-orange-500 text-orange-600 bg-gray-50 dark:bg-gray-800 cursor-pointer transition">
-                    <i class="fas fa-microphone-alt mr-3"></i><span class="font-bold">Episodes</span>
-                </div>
-                <div
-                    class="w-40 flex items-center justify-center p-4 border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition">
-                    <i class="fas fa-tag mr-3 text-green-500"></i><span class="font-medium">Marketplace</span>
-                </div>
+            <!-- Play/Shuffle Header -->
+            <div class="px-4 pt-6 pb-2 bg-white dark:bg-gmailDark flex items-center space-x-4">
+                <button onclick="playHeaderBtn()"
+                    class="w-14 h-14 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center shadow-lg transition transform hover:scale-105">
+                    <i class="fas fa-play text-white text-2xl ml-1"></i>
+                </button>
+                <button onclick="toggleShuffle()" id="shuffleBtn"
+                    class="text-gray-400 hover:text-orange-500 transition text-2xl p-2">
+                    <i class="fas fa-random"></i>
+                </button>
             </div>
 
+            <!-- Horizontal Filter Bar -->
             <div
-                class="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gmailDark sticky top-[66px] z-10">
-                <div class="relative">
-                    <button onclick="toggleDateMenu()"
-                        class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-1 rounded border border-transparent hover:border-gray-200 dark:hover:border-gray-600 flex items-center">
-                        <span id="dateLabel">Sort 2016-2022</span> <i class="fas fa-caret-down ml-2"></i>
-                    </button>
-                    <div id="dateMenu"
-                        class="hidden absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 shadow-xl rounded-lg border border-gray-200 dark:border-gray-600 py-2 z-20">
-                        <div class="text-xs font-bold text-gray-400 px-4 py-1 uppercase tracking-wider">Date Modified
-                        </div>
-                        <div onclick="setFilter('any')" id="opt-any"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200 active-filter">
-                            <span>Any time</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
-                        <div onclick="setFilter('2022')" id="opt-2022"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
-                            <span>2022</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                        <div onclick="setFilter('2021')" id="opt-2021"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
-                            <span>2021</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                        <div onclick="setFilter('2020')" id="opt-2020"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
-                            <span>2020</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                        <div onclick="setFilter('2019')" id="opt-2019"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
-                            <span>2019</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                        <div onclick="setFilter('2018')" id="opt-2018"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
-                            <span>2018</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                        <div onclick="setFilter('2017')" id="opt-2017"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
-                            <span>2017</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                        <div onclick="setFilter('2016')" id="opt-2016"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
-                            <span>2016</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
-                        <div onclick="openCustomRange()" id="opt-custom"
-                            class="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200">
-                            <span>Custom Range...</span> <i class="fas fa-check text-blue-600 check-icon"></i>
-                        </div>
-                    </div>
+                class="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gmailDark sticky top-0 z-10 overflow-x-auto no-scrollbar">
+                <div class="flex space-x-2 items-center" id="filterBar">
+                    <button onclick="setFilter('any')" id="btn-any"
+                        class="filter-chip active-chip whitespace-nowrap">All</button>
+                    <button onclick="setFilter('2022')" id="btn-2022"
+                        class="filter-chip whitespace-nowrap">2022</button>
+                    <button onclick="setFilter('2021')" id="btn-2021"
+                        class="filter-chip whitespace-nowrap">2021</button>
+                    <button onclick="setFilter('2020')" id="btn-2020"
+                        class="filter-chip whitespace-nowrap">2020</button>
+                    <button onclick="setFilter('2019')" id="btn-2019"
+                        class="filter-chip whitespace-nowrap">2019</button>
+                    <button onclick="setFilter('2018')" id="btn-2018"
+                        class="filter-chip whitespace-nowrap">2018</button>
+                    <button onclick="setFilter('2017')" id="btn-2017"
+                        class="filter-chip whitespace-nowrap">2017</button>
+                    <button onclick="setFilter('2016')" id="btn-2016"
+                        class="filter-chip whitespace-nowrap">2016</button>
+                    <button onclick="openCustomRange()" id="btn-custom"
+                        class="filter-chip whitespace-nowrap">Custom</button>
                 </div>
-                <span id="resultCount" class="text-xs text-gray-400">Loading...</span>
+                <span id="resultCount" class="text-xs text-gray-400 ml-4 whitespace-nowrap">Loading...</span>
             </div>
 
             <!-- Spinning Loader -->
@@ -391,6 +386,8 @@
             </div>
 
             <div id="episodeList" class="pb-24 hidden"></div>
+            <div id="marketplaceList" class="hidden pb-24"></div>
+
             <button onclick="scrollToTop()" id="backToTopBtn"
                 class="fixed bottom-24 right-8 bg-gray-600 hover:bg-gray-800 text-white w-12 h-12 rounded-lg shadow-lg flex items-center justify-center transition-transform transform translate-y-32 z-40">
                 <i class="fas fa-arrow-up"></i>
@@ -401,7 +398,6 @@
     <!-- Spotify Style Footer -->
     <footer
         class="h-24 bg-black border-t border-gray-800 flex items-center px-4 justify-between z-50 shrink-0 shadow-lg text-white">
-
         <!-- Left: Info -->
         <div class="flex items-center w-1/4 min-w-[200px]">
             <div
@@ -414,13 +410,17 @@
                     episode</div>
                 <div id="playerDate" class="text-xs text-gray-400 hover:underline cursor-pointer">The Future Files</div>
             </div>
-
         </div>
 
-        <div class="flex-1 flex justify-center px-4">
+        <div class="flex-1 flex justify-center px-4 items-center space-x-4">
+            <button onclick="playPrev()" class="text-gray-400 hover:text-white transition">
+                <i class="fas fa-step-backward text-xl"></i>
+            </button>
             <audio id="audioElement" controls class="w-full max-w-3xl h-10"></audio>
+            <button onclick="playNext()" class="text-gray-400 hover:text-white transition">
+                <i class="fas fa-step-forward text-xl"></i>
+            </button>
         </div>
-
     </footer>
 
     <div id="composeModal"
@@ -473,9 +473,10 @@
         let activeFilter = 'any';
         let customStart = null;
         let customEnd = null;
-        let isShuffle = false;
-        let isLoop = false;
         let openDropdownUids = new Set();
+        let currentView = 'episodes';
+        let isShuffleOn = false;
+        let currentFilteredData = [];
 
         const player = document.getElementById('audioElement');
 
@@ -516,35 +517,41 @@
         }
         function scrollToTop() { document.getElementById('mainContainer').scrollTo({ top: 0, behavior: 'smooth' }); }
 
-        function toggleDateMenu() { document.getElementById('dateMenu').classList.toggle('hidden'); }
-        document.addEventListener('click', function (event) {
-            const menu = document.getElementById('dateMenu');
-            const button = document.querySelector('button[onclick="toggleDateMenu()"]');
-            if (!button.contains(event.target) && !menu.contains(event.target)) menu.classList.add('hidden');
-        });
-
+        // --- Filter Logic ---
         function setFilter(val) {
             activeFilter = val; customStart = null; customEnd = null;
-            updateFilterUI(val === 'any' ? 'Sort 2016-2022' : val);
-            document.getElementById('dateMenu').classList.add('hidden');
+            updateFilterUI(val);
             runFilters();
         }
 
-        function updateFilterUI(label) {
-            document.getElementById('dateLabel').innerText = label;
-            document.querySelectorAll('#dateMenu .active-filter').forEach(el => el.classList.remove('active-filter'));
-            if (activeFilter === 'custom') document.getElementById('opt-custom').classList.add('active-filter');
-            else { const el = document.getElementById(`opt-${activeFilter}`); if (el) el.classList.add('active-filter'); }
+        function updateFilterUI(val) {
+            // Reset all chips
+            document.querySelectorAll('.filter-chip').forEach(el => {
+                el.classList.remove('active-chip');
+                if (el.id === 'btn-custom') el.innerText = "Custom";
+            });
+
+            // Activate selected
+            if (val === 'custom') {
+                const btn = document.getElementById('btn-custom');
+                btn.classList.add('active-chip');
+                if (customStart && customEnd) {
+                    btn.innerText = `${formatDateWithSlashes(customStart)} - ${formatDateWithSlashes(customEnd)}`;
+                }
+            } else {
+                const btn = document.getElementById(`btn-${val}`);
+                if (btn) btn.classList.add('active-chip');
+            }
         }
 
-        function openCustomRange() { document.getElementById('dateMenu').classList.add('hidden'); document.getElementById('customRangeModal').classList.remove('hidden'); }
+        function openCustomRange() { document.getElementById('customRangeModal').classList.remove('hidden'); }
         function closeCustomRange() { document.getElementById('customRangeModal').classList.add('hidden'); }
         function applyCustomRange() {
             const s = document.getElementById('startDate').value;
             const e = document.getElementById('endDate').value;
             if (s && e) {
                 activeFilter = 'custom'; customStart = s.replace(/-/g, ''); customEnd = e.replace(/-/g, '');
-                updateFilterUI("Custom Range"); closeCustomRange(); runFilters();
+                updateFilterUI("custom"); closeCustomRange(); runFilters();
             } else alert("Please select both dates.");
         }
 
@@ -567,12 +574,14 @@
                         const textLower = (ep.search_text || "").toLowerCase();
                         return terms.every(term => titleLower.includes(term) || textLower.includes(term));
                     });
+                    currentFilteredData = data;
                     renderEpisodes(data, terms);
                     return;
                 }
             } else if (query && query.trim().length > 0 && query.trim().length < 3) {
                 return;
             }
+            currentFilteredData = data;
             renderEpisodes(data);
         }
 
@@ -582,6 +591,10 @@
         function renderEpisodes(data, searchTerms = []) {
             list.innerHTML = "";
             countLabel.innerText = `${data.length} episodes`;
+
+            // Hide loader, show list
+            document.getElementById('initialLoader').classList.add('hidden');
+            document.getElementById('episodeList').classList.remove('hidden');
 
             data.forEach((ep, index) => {
                 const uid = ep._uid !== undefined ? ep._uid : index;
@@ -718,7 +731,153 @@
 
         function handleInputSearch() { runFilters(); }
 
+        // --- View Logic ---
+        function setView(viewName) {
+            currentView = viewName;
+            const epNav = document.getElementById('nav-episodes');
+            const mkNav = document.getElementById('nav-marketplace');
+            const epList = document.getElementById('episodeList');
+            const mkList = document.getElementById('marketplaceList');
+            const filterBar = document.getElementById('filterBar').parentElement; // The sticky header for filters
+
+            // Reset Styles
+            const activeClass = "bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 font-bold border-orange-500".split(" ");
+            const inactiveClass = "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-400 border-transparent".split(" ");
+
+            if (viewName === 'episodes') {
+                // Style Episodes Active
+                epNav.classList.remove(...inactiveClass);
+                epNav.classList.add(...activeClass);
+
+                // Style Marketplace Inactive
+                mkNav.classList.remove(...activeClass);
+                mkNav.classList.add(...inactiveClass);
+
+                // Show Episodes
+                epList.classList.remove('hidden');
+                mkList.classList.add('hidden');
+                filterBar.classList.remove('hidden');
+
+                // Ensure filters run
+                runFilters();
+            } else {
+                // Style Marketplace Active
+                mkNav.classList.remove(...inactiveClass);
+                mkNav.classList.add(...activeClass);
+
+                // Style Episodes Inactive
+                epNav.classList.remove(...activeClass);
+                epNav.classList.add(...inactiveClass);
+
+                // Show Marketplace
+                mkList.classList.remove('hidden');
+                epList.classList.add('hidden');
+                filterBar.classList.add('hidden');
+
+                renderMarketplace();
+            }
+        }
+
+        function renderMarketplace() {
+            const list = document.getElementById('marketplaceList');
+            list.innerHTML = "";
+
+            const items = [
+                {
+                    title: "Depop",
+                    desc: "100% Cotton T-Shirts made in Los Angeles",
+                    link: "https://www.depop.com/fivestarsilver",
+                    icon: "fas fa-tshirt"
+                },
+                {
+                    title: "DVD Collection",
+                    desc: "Curated selection of rare films",
+                    link: "#",
+                    icon: "fas fa-compact-disc"
+                },
+                {
+                    title: "Stickers",
+                    desc: "High quality vinyl stickers",
+                    link: "#",
+                    icon: "fas fa-sticky-note"
+                },
+                {
+                    title: "Posters",
+                    desc: "Limited edition prints",
+                    link: "#",
+                    icon: "fas fa-image"
+                },
+                {
+                    title: "Digital Downloads",
+                    desc: "Exclusive audio content",
+                    link: "#",
+                    icon: "fas fa-file-audio"
+                }
+            ];
+
+            items.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = "border-b border-gray-100 dark:border-gray-700 transition relative group hover:bg-gray-50 dark:hover:bg-darkRowHover cursor-pointer";
+                row.onclick = () => window.open(item.link, '_blank');
+
+                row.innerHTML = `
+                    <div class="flex items-center px-4 py-3">
+                        <!-- Index Column -->
+                        <div class="w-12 flex justify-center items-center flex-shrink-0 mr-4">
+                            <span class="text-gray-500 font-medium text-sm">${index + 1}</span>
+                        </div>
+
+                        <!-- Icon Column -->
+                        <div class="w-12 h-12 flex-shrink-0 mr-4 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                            <i class="${item.icon} text-gray-500 dark:text-gray-400 text-xl"></i>
+                        </div>
+
+                        <!-- Title/Desc Column -->
+                        <div class="flex-1 min-w-0 pr-4">
+                            <div class="flex items-baseline mb-1">
+                                <span class="text-gray-900 dark:text-white font-bold text-base mr-2">${item.title}</span>
+                                ${item.title === 'Depop' ? '<i class="fas fa-tag text-green-500 text-sm"></i>' : ''}
+                            </div>
+                            <div class="leading-relaxed text-gray-500 dark:text-gray-400 text-sm truncate">
+                                ${item.desc}
+                            </div>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div class="w-12 flex justify-center items-center text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+        }
+
         // --- Audio Logic ---
+
+        function toggleShuffle() {
+            isShuffleOn = !isShuffleOn;
+            const btn = document.getElementById('shuffleBtn');
+            if (isShuffleOn) {
+                btn.classList.remove('text-gray-400');
+                btn.classList.add('text-orange-500');
+            } else {
+                btn.classList.remove('text-orange-500');
+                btn.classList.add('text-gray-400');
+            }
+        }
+
+        function playHeaderBtn() {
+            if (!currentFilteredData || currentFilteredData.length === 0) return;
+
+            if (isShuffleOn) {
+                const randomEp = currentFilteredData[Math.floor(Math.random() * currentFilteredData.length)];
+                playEpisode(randomEp._uid !== undefined ? randomEp._uid : window.db.indexOf(randomEp));
+            } else {
+                const firstEp = currentFilteredData[0];
+                playEpisode(firstEp._uid !== undefined ? firstEp._uid : window.db.indexOf(firstEp));
+            }
+        }
 
         function playEpisode(uid, startTime = 0) {
             const ep = window.db[uid];
@@ -759,8 +918,12 @@
         }
 
         function playNext() {
-            if (!window.db || currentPlayingUid === null) return;
-            if (currentPlayingUid < window.db.length - 1) {
+            if (!window.db) return;
+
+            if (isShuffleOn && currentFilteredData.length > 0) {
+                const randomEp = currentFilteredData[Math.floor(Math.random() * currentFilteredData.length)];
+                playEpisode(randomEp._uid !== undefined ? randomEp._uid : window.db.indexOf(randomEp));
+            } else if (currentPlayingUid !== null && currentPlayingUid < window.db.length - 1) {
                 playEpisode(currentPlayingUid + 1);
             }
         }
@@ -772,45 +935,46 @@
             }
         }
 
-        player.addEventListener('ended', () => {
-            playNext();
-        });
+        player.addEventListener('ended', () => { playNext(); });
 
         // --- Overlay Logic ---
         function toggleOverlay() {
             const overlay = document.getElementById('micOverlay');
-            const btn = document.getElementById('micBtn');
             if (overlay.classList.contains('hidden')) {
                 overlay.classList.remove('hidden');
-                btn.classList.add('text-green-500');
             } else {
                 overlay.classList.add('hidden');
-                btn.classList.remove('text-green-500');
             }
         }
 
         function updateOverlayContent(ep) {
             document.getElementById('overlayTitle').innerText = ep.title;
             const textContainer = document.getElementById('overlayText');
-
             if (ep.segments && ep.segments.length > 0) {
-                // Show full transcript in overlay
                 textContainer.innerHTML = ep.segments.map(s => `<p>${s.t}</p>`).join('');
             } else {
                 textContainer.innerText = ep.search_text || "No transcript available.";
             }
         }
 
-        function toggleCompose() { const modal = document.getElementById('composeModal'); if (modal.classList.contains('hidden')) { modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('translate-y-full'), 10); } else { modal.classList.add('translate-y-full'); setTimeout(() => modal.classList.add('hidden'), 300); } }
-
-        window.onload = function () {
-            if (window.db) {
-                window.db.forEach((ep, i) => ep._uid = i);
-                renderEpisodes(window.db);
-                // Hide loader
-                document.getElementById('initialLoader').classList.add('hidden');
-                document.getElementById('episodeList').classList.remove('hidden');
+        function toggleCompose() {
+            const modal = document.getElementById('composeModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('translate-y-full'), 10);
+            } else {
+                modal.classList.add('translate-y-full');
+                setTimeout(() => modal.classList.add('hidden'), 300);
             }
+        }
+
+        // Initialize
+        window.onload = function () {
+            // Wait for data parts to load
+            setTimeout(() => {
+                if (window.db) runFilters();
+                else console.error("Database not loaded");
+            }, 500);
         };
     </script>
 </body>
