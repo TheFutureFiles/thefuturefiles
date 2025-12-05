@@ -263,7 +263,6 @@
 
             <div class="flex items-center mr-8">
                 <img src="thefuturefiles.jpg" class="h-10 w-10 object-cover rounded-[14px] mr-3 shadow-sm">
-                <span class="text-xl font-bold tracking-tight text-gray-800 dark:text-white">The Future Files</span>
             </div>
 
             <div
@@ -322,10 +321,6 @@
                 <div
                     class="w-40 flex items-center justify-center p-4 border-b-4 border-orange-500 text-orange-600 bg-gray-50 dark:bg-gray-800 cursor-pointer transition">
                     <i class="fas fa-microphone-alt mr-3"></i><span class="font-bold">Episodes</span>
-                </div>
-                <div
-                    class="w-40 flex items-center justify-center p-4 border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition">
-                    <i class="fas fa-video mr-3 text-blue-500"></i><span class="font-medium">Video</span>
                 </div>
                 <div
                     class="w-40 flex items-center justify-center p-4 border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition">
@@ -593,6 +588,7 @@
 
                 const displayDate = formatDateWithSlashes(ep.date || "");
                 let snippet = "";
+                let displayTitle = ep.title;
                 const isSearching = searchTerms.length > 0;
 
                 if (isSearching) {
@@ -600,12 +596,17 @@
                     const fullText = ep.search_text || "";
                     const matchIndex = fullText.indexOf(primaryTerm);
                     if (matchIndex !== -1) {
-                        const startIdx = Math.max(0, matchIndex - 150);
+                        let startIdx = Math.max(0, matchIndex - 150);
+                        if (startIdx > 0) {
+                            const nextSpace = fullText.indexOf(' ', startIdx);
+                            if (nextSpace !== -1) startIdx = nextSpace + 1;
+                        }
                         const endIdx = Math.min(fullText.length, matchIndex + 600);
-                        snippet = "..." + fullText.substring(startIdx, endIdx) + "...";
+                        snippet = fullText.substring(startIdx, endIdx) + "...";
                         searchTerms.forEach(term => {
                             const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
                             snippet = snippet.replace(regex, '<span class="rainbow-glow">$1</span>');
+                            displayTitle = displayTitle.replace(regex, '<span class="rainbow-glow">$1</span>');
                         });
                     } else { snippet = fullText.substring(0, 300) + "..."; }
                 } else {
@@ -643,7 +644,7 @@
                         <!-- Title/Snippet Column -->
                         <div class="flex-1 min-w-0 pr-4">
                             <div class="flex items-baseline mb-1">
-                                <span class="text-gray-900 dark:text-white font-bold text-base mr-2 ${currentPlayingUid === uid ? 'text-orange-500 dark:text-orange-400' : ''}">${ep.title}</span>
+                                <span class="text-gray-900 dark:text-white font-bold text-base mr-2 ${currentPlayingUid === uid ? 'text-orange-500 dark:text-orange-400' : ''}">${displayTitle}</span>
                             </div>
                             <div class="leading-relaxed text-gray-500 dark:text-gray-400 text-sm ${isSearching ? '' : 'truncate'}">
                                 ${snippet}
